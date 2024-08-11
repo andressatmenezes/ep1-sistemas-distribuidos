@@ -5,6 +5,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 
 import com.firstproject.grpc.MessengerGrpc;
@@ -44,7 +45,7 @@ public class JavaClient {
     
     public void receiveMessage(String channelName) {
     	ChannelRequest request = ChannelRequest.newBuilder().setChannel(channelName).build();
-        ChannelInfo channelInfo = blockingStub.getChannelInfo(request);
+        ChannelInfo channelInfo = blockingStub.withDeadlineAfter(30, TimeUnit.SECONDS).getChannelInfo(request);
     	//subscriber no canal tipo unary
         if (channelInfo.getType() == ChannelType.UNARY) {
         	//System.out.println("Ouvindo mensagens em unary :D ");
@@ -64,14 +65,14 @@ public class JavaClient {
     	        }
 
     	        public void onError(Throwable t) {
-    	            System.err.println("Error receiving message: " + t);
+    	            System.err.println("Erro ao receber a mensagem: " + t);
     	        }
 
     	        public void onCompleted() {
-    	            System.out.println("Stream completed.");
+    	            System.out.println("Stream completo.");
     	        }
     	    };
-    	    asyncStub.streamMessages(request, responseObserver);
+    	    asyncStub.withDeadlineAfter(30, TimeUnit.SECONDS).streamMessages(request, responseObserver);
     	    try {
                 Thread.sleep(Long.MAX_VALUE);
             } catch (InterruptedException e) {
@@ -135,6 +136,5 @@ public class JavaClient {
 	
 	
 }
-
 
 
